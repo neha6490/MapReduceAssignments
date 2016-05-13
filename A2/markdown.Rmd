@@ -1,0 +1,95 @@
+---
+title: "HW02 Markdown Reprt"
+author: "Neha Patwardhan, Joy Machado"
+date: "January 31, 2016"
+output: html_document
+---
+
+###Markdown Report
+
+###Required Libraries to run the R Script
+```{r echo=FALSE}
+require(dplyr)
+require(ggplot2)
+require(markdown)
+```
+
+### R Script
+```{r }
+# Read the data from the Output file of the Map Reduce Program as an input for the R Script
+args <- commandArgs(TRUE)
+# The path of the output is the command line argument for the R script
+srcFile <- args[1]
+files <- dir(srcFile, pattern='part-r-', full.names = TRUE)
+
+
+outputs <- lapply(files, read.csv, header=FALSE, sep="\t")
+output <- bind_rows(outputs)
+colnames(output) <- c("carrier","price","month","frequency")
+
+# Sort the input to the R scipt in the descending order of Frequency
+sorted <- output[order(-output$frequency),]
+
+# Rank the outputsin order of Frequency after it has been sorted.
+# The Airlines with the highest frequency will have the highest Rank
+sorted$rank <- rank(-sorted$frequency,ties.method="min")
+
+# Assign Dense Ranking to find the real rank of the Airlines as a group 
+sorted$drank <- rep(1:length(rle(sorted$rank)$values),rle(sorted$rank)$lengths)
+
+# Keep only the top 10 airlines with the highest frequency
+sortedNew <- sorted[sorted$drank <= 10,]
+
+
+
+
+```
+
+
+###Plotting the graph of the Average Price of Airlines vs Month
+```{r, echo=FALSE}
+plot1 <- ggplot(data=sortedNew,aes(x=sortedNew$month,y=sortedNew$price,color=sortedNew$carrier)) + geom_line() + scale_color_manual(name="Top 10 Airlines",values = c("red","green","blue","orange","purple","pink","yellow","black","brown","maroon")) + ggtitle("Average price of airlines per month") + labs(x="Month(1-12)",y="Average Price(USD)")
+
+plot1
+```
+
+# Explanation of our Map Reduce Program
+  
+# Mapper
+`The Mapper reads the files from the input and goes through the sanity check
+`If a record passes through the sanity check, we have kept a lookout for the carriers active in 2015. If the airlines is active in 2015, we add it to a    Global set.
+`The carrier name is set as the Key of the mapper.
+`A flight object is created with the year, month and average price of each record and provided to the Reducer as the value.
+  
+#Reducer
+`The Reducer accepts the Carrier name as the Key and we extract the month, and averge price of each flight.
+`The average price is computed and the frequency for each key is calcualted.
+`If a flight is present in the Global set, only then we print it to the Output files of the Program.
+  
+  
+# Input for R
+`The output file of the map reduce program is the input file for the R script.
+`The R script sorts the output in the descending manner of Frequency.
+`A rank is assigned to each record.
+`A Dense rank is then assigned to Ranked and Sorted data set.
+`Only the Airlines with the top 10 frequencies are considered.
+`This is then given as an input to graph which plot the Average Price of each airlines against each month.
+
+   
+# Requirements
+`Install R 3.2.3
+`Run the markdown file in R Studio
+`Install the following packages in R
+` dplyr
+`, ggplot2
+`, markdown
+
+`Also have pandoc installed on your system to view the markdown as a HTML
+
+
+
+
+   
+   
+  
+

@@ -1,0 +1,69 @@
+---
+title: "MarkDown HW03"
+author: "Neha Patwardhan, Joy Machado"
+date: "February 6, 2016"
+output: html_document
+---
+
+This is the markdown created to compare Sequential Program, Multi Threaded Programming, Psuedo Distributed MR and Distributed MR.
+
+Each version of the Program computes a mean, median and fast median values.
+
+The R script is written to compare the time it takes to compute the mean, median or fast median for each type of program i.e. sequential, multi threaded, psuedo distributed and distributed.
+```{r,}
+require(ggplot2)
+require(dplyr)
+library(ggplot2)
+
+# Read argument, i.e. location of the output folder
+args <- commandArgs(TRUE)
+srcFile <- "C:\\Users\\Joy\\Desktop"
+
+# Find all the CSV files in the output folder
+files <- dir(srcFile, pattern='.csv', full.names = TRUE)
+# Read the CSV files
+outputs <- lapply(files, read.csv, header=FALSE, sep=",")
+# Binding all the rows from all the files
+output <- bind_rows(outputs)
+# Add colum names to the file
+colnames(output) <- c("category","type","price")
+
+```
+
+The Plot comparing the performance of the four types of programs written to compute mean, median, fast median.
+
+```{r, echo=FALSE}
+plot1 <- ggplot(data =output,aes(x=output$category,y=output$price,color=output$type,group=output$type))+geom_line()+geom_point(size=2)
+plot1
+```
+
+##Explaination:
+Each type of configuration is run three times to compute mean median and fast median.
+
+This creates four CSV files. Each of the CSV files has 3 log times recorded in it for mean, median and fast median.
+
+The outputs files are appended into a single output in R and analysed for time based performance.
+
+According to the graphs that we produced, for a large amount of data, psuedo distributed and distributed data was the fastest. Followed by multi threaded program and then sequential program.
+
+##Conclusion:
+
+###Small Data:
+For small amount of data, we noticed that multi threaded programs ran the fastest. Followed by the sequential Program and psuedo distributed program. The distributed program gave the worst performance.
+
+###Original Data:
+For the original amount of data given, multi threaded program still gave us the best performance, followed by psuedo distributed program and then sequential program. Distributed program still ran the worst.
+
+###Replicating the data thrice:
+For replicating the data thrice, psuedo distributed mode ran the fastest, followed by multi threaded program and then sequential. The distributed mode still gave us the slowest performance.
+
+###Replicating the data eight times:
+In this case, the distributed mode ran the fasest, follwed by the psuedo distributed code and then the multi threaded program. The worst performance was by the sequential mode.
+
+Therefore what we understood is that distiributed mode works best for very very large amounts of data. For smaller amounts of data, psuedo distributed mode is sufficient. If the data happens to be small, its best to use a multi threaded program.
+
+
+##Fast Median vs Median 
+We always noticed that the way we were computing fast median was always faster than the regular way of finding median
+
+
